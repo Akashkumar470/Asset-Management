@@ -35,7 +35,7 @@ app.listen(PORT, (err) => {
 
       // Set up keep-alive ping
       setInterval(() => {
-        app.fetch(`http://localhost:${PORT}/keep-alive`)
+        app.fetch(`http://localhost:${PORT}/keep-alive`, { method: "GET" })
           .then(response => {
             console.log("Keep-alive ping successful:", response.data);
           })
