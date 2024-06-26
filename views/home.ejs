@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Assets Management</title>
+    <style>
+      /* Reset styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins-Regular", sans-serif;
+      }
+
+      /* Body styles */
+      body {
+        background-color: #f8f9fa;
+        margin: 20px;
+      }
+
+      /* Container styles */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        color: #6862d5;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      /* Table wrapper styles */
+      .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Table styles */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #6862d5;
+        color: #fff;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      tr:hover {
+        background-color: #ddd;
+      }
+
+      /* Button styles */
+      .btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .btn.edit {
+        background-color: #ffa500;
+        color: white;
+      }
+
+      .btn.delete {
+        background-color: #ff4c4c;
+        color: white;
+      }
+
+      .btn.edit:hover {
+        background-color: #ff8c00;
+      }
+
+      .btn.delete:hover {
+        background-color: #ff1c1c;
+      }
+
+      /* Pagination styles */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .pagination a {
+        color: #6862d5;
+        padding: 8px 16px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+      }
+
+      .pagination a.active {
+        background-color: #6862d5;
+        color: white;
+        border-radius: 5px;
+      }
+
+      .pagination a:hover:not(.active) {
+        background-color: #ddd;
+        border-radius: 5px;
+      }
+
+      /* Logout link styles */
+      a.logout {
+        color: #6862d5;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Assets Management</h1>
+      <div style="display: flex; justify-content: space-between; align-items: center; ">
+        <a href="/add-asset" class="logout">Add</a>
+        <a href="/logout" class="logout">Logout</a>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="assetTable">
+          <thead id="tableHead">
+            <!-- Thead content will be dynamically generated -->
+          </thead>
+          <tbody id="assetBody">
+            <!-- Rows will be populated dynamically using JavaScript -->
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+          const assets = <%- JSON.stringify(assets) %>;
+
+          const headingsPart1 = ['Asset Status', 'Unit Name', 'SAP FA Id', 'Device Type', 'Department', 'User Name', 'Mail ID', 'Location', 'Device Make', 'Device Model', 'Actions'];
+          const headingsPart2 = ['Device S/N', 'Processor', 'RAM', 'HDD', 'SSD', 'OS Name and Version', 'PO No', 'PO Date', 'AMC / Warranty', 'Warranty End Date', 'Remark', 'Actions'];
+
+          const keysPart1 = ['assetStatus', 'unitName', 'sapFaId', 'deviceType', 'department', 'userName', 'mailId', 'location', 'deviceMake', 'deviceModel'];
+          const keysPart2 = ['deviceSn', 'processor', 'ram', 'hdd', 'ssd', 'osNameVersion', 'poNo', 'poDate', 'amcWarranty', 'warrantyEndDate', 'remark'];
+
+          let currentPage = 1;
+
+          function renderTablePage(page) {
+              const tableHead = document.getElementById('tableHead');
+              const tbody = document.getElementById('assetBody');
+              tbody.innerHTML = '';
+
+              const headings = page === 1 ? headingsPart1 : headingsPart2;
+              const keys = page === 1 ? keysPart1 : keysPart2;
+
+              tableHead.innerHTML = '<tr>' + headings.map(heading => `<th>${heading}</th>`).join('') + '</tr>';
+
+              assets.forEach(asset => {
+                  const row = document.createElement('tr');
+                  keys.forEach(key => {
+                      const cell = document.createElement('td');
+                      cell.textContent = asset[key];
+                      row.appendChild(cell);
+                  });
+
+                  // Add Actions cell
+                  const actionsCell = document.createElement('td');
+                  actionsCell.innerHTML = `
+                      <form action="/edit-asset/${asset._id}" method="get" style="display:inline;">
+                          <button type="submit" class="btn edit">Edit</button>
+                      </form>
+                      <form action="/delete-asset/${asset._id}" method="post" style="display:inline;">
+                          <button type="submit" class="btn delete">Delete</button>
+                      </form>
+                  `;
+                  row.appendChild(actionsCell);
+
+                  tbody.appendChild(row);
+              });
+          }
+
+          function renderPagination() {
+              const pagination = document.getElementById('pagination');
+              pagination.innerHTML = '';
+
+              for (let i = 1; i <= 2; i++) {
+                  const pageLink = document.createElement('a');
+                  pageLink.textContent = i;
+                  pageLink.href = '#';
+                  pageLink.className = i === currentPage ? 'active' : '';
+                  pageLink.addEventListener('click', function (event) {
+                      event.preventDefault();
+                      currentPage = i;
+                      renderTablePage(currentPage);
+                      renderPagination();
+                  });
+                  pagination.appendChild(pageLink);
+              }
+          }
+
+          renderTablePage(currentPage);
+          renderPagination();
+      });
+    </script>
+  </body>
+</html>

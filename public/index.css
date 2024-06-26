@@ -1,0 +1,83 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat:700");
+@import url("https://fonts.googleapis.com/css?family=Poppins:400,500,700");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body,
+html {
+  height: 100%;
+  font-family: Poppins-Regular, sans-serif;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #9053c7;
+  background: -webkit-linear-gradient(-135deg, #ff512f, #dd2476);
+  background: -o-linear-gradient(-135deg, #ff512f, #dd2476);
+  background: -moz-linear-gradient(-135deg, #ff512f, #dd2476);
+  background: linear-gradient(-135deg, #ff512f, #dd2476);
+}
+
+.limiter {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.container-welcome {
+  width: 100%;
+  min-height: 100vh;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+}
+
+.wrap-welcome {
+  width: 960px;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 50px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+h1 {
+  font-family: Poppins-Bold;
+  font-size: 2.5em;
+  color: #333333;
+  margin-bottom: 20px;
+}
+
+.links {
+  margin-top: 20px;
+}
+
+a.btn {
+  display: inline-block;
+  margin: 0 10px;
+  padding: 10px 20px;
+  font-size: 1em;
+  color: #fff;
+  background: #6862d5;
+  border: none;
+  border-radius: 25px;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+a.btn:hover {
+  background: #333333;
+}
