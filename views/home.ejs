@@ -34,6 +34,20 @@
         margin-bottom: 20px;
       }
 
+      /* Search bar styles */
+      .search-bar {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      .search-bar input {
+        width: 300px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+
       /* Table wrapper styles */
       .table-wrapper {
         overflow-x: auto;
@@ -132,9 +146,14 @@
   <body>
     <div class="container">
       <h1>Assets Management</h1>
-      <div style="display: flex; justify-content: space-between; align-items: center; ">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
         <a href="/add-asset" class="logout">Add</a>
         <a href="/logout" class="logout">Logout</a>
+      </div>
+
+      <!-- Search bar -->
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search assets..." />
       </div>
 
       <div class="table-wrapper">
@@ -151,71 +170,90 @@
     </div>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-          const assets = <%- JSON.stringify(assets) %>;
+        const assets = <%- JSON.stringify(assets) %>;
 
-          const headingsPart1 = ['Asset Status', 'Unit Name', 'SAP FA Id', 'Device Type', 'Department', 'User Name', 'Mail ID', 'Location', 'Device Make', 'Device Model', 'Actions'];
-          const headingsPart2 = ['Device S/N', 'Processor', 'RAM', 'HDD', 'SSD', 'OS Name and Version', 'PO No', 'PO Date', 'AMC / Warranty', 'Warranty End Date', 'Remark', 'Actions'];
+        const headingsPart1 = [
+          'Asset Status', 'Unit Name', 'SAP FA Id', 'Device Type', 'Department', 'User Name', 'Mail ID', 'Location', 'Device Make', 'Device Model', 'Actions'
+        ];
+        const headingsPart2 = [
+          'Device S/N', 'Processor', 'RAM', 'HDD', 'SSD', 'OS Name and Version', 'PO No', 'PO Date', 'AMC / Warranty', 'Warranty End Date', 'Remark', 'Actions'
+        ];
 
-          const keysPart1 = ['assetStatus', 'unitName', 'sapFaId', 'deviceType', 'department', 'userName', 'mailId', 'location', 'deviceMake', 'deviceModel'];
-          const keysPart2 = ['deviceSn', 'processor', 'ram', 'hdd', 'ssd', 'osNameVersion', 'poNo', 'poDate', 'amcWarranty', 'warrantyEndDate', 'remark'];
+        const keysPart1 = [
+          'assetStatus', 'unitName', 'sapFaId', 'deviceType', 'department', 'userName', 'mailId', 'location', 'deviceMake', 'deviceModel'
+        ];
+        const keysPart2 = [
+          'deviceSn', 'processor', 'ram', 'hdd', 'ssd', 'osNameVersion', 'poNo', 'poDate', 'amcWarranty', 'warrantyEndDate', 'remark'
+        ];
 
-          let currentPage = 1;
+        let currentPage = 1;
 
-          function renderTablePage(page) {
-              const tableHead = document.getElementById('tableHead');
-              const tbody = document.getElementById('assetBody');
-              tbody.innerHTML = '';
+        function renderTablePage(page, searchTerm = '') {
+          const tableHead = document.getElementById('tableHead');
+          const tbody = document.getElementById('assetBody');
+          tbody.innerHTML = '';
 
-              const headings = page === 1 ? headingsPart1 : headingsPart2;
-              const keys = page === 1 ? keysPart1 : keysPart2;
+          const headings = page === 1 ? headingsPart1 : headingsPart2;
+          const keys = page === 1 ? keysPart1 : keysPart2;
 
-              tableHead.innerHTML = '<tr>' + headings.map(heading => `<th>${heading}</th>`).join('') + '</tr>';
+          tableHead.innerHTML = '<tr>' + headings.map(heading => `<th>${heading}</th>`).join('') + '</tr>';
 
-              assets.forEach(asset => {
-                  const row = document.createElement('tr');
-                  keys.forEach(key => {
-                      const cell = document.createElement('td');
-                      cell.textContent = asset[key];
-                      row.appendChild(cell);
-                  });
+          const filteredAssets = assets.filter(asset => {
+            const assetValues = Object.values(asset).join(' ').toLowerCase();
+            return assetValues.includes(searchTerm.toLowerCase());
+          });
 
-                  // Add Actions cell
-                  const actionsCell = document.createElement('td');
-                  actionsCell.innerHTML = `
-                      <form action="/edit-asset/${asset._id}" method="get" style="display:inline;">
-                          <button type="submit" class="btn edit">Edit</button>
-                      </form>
-                      <form action="/delete-asset/${asset._id}" method="post" style="display:inline;">
-                          <button type="submit" class="btn delete">Delete</button>
-                      </form>
-                  `;
-                  row.appendChild(actionsCell);
+          filteredAssets.forEach(asset => {
+            const row = document.createElement('tr');
+            keys.forEach(key => {
+              const cell = document.createElement('td');
+              cell.textContent = asset[key];
+              row.appendChild(cell);
+            });
 
-                  tbody.appendChild(row);
-              });
+            // Add Actions cell
+            const actionsCell = document.createElement('td');
+            actionsCell.innerHTML = `
+              <form action="/edit-asset/${asset._id}" method="get" style="display:inline;">
+                <button type="submit" class="btn edit">Edit</button>
+              </form>
+              <form action="/delete-asset/${asset._id}" method="post" style="display:inline;">
+                <button type="submit" class="btn delete">Delete</button>
+              </form>
+            `;
+            row.appendChild(actionsCell);
+
+            tbody.appendChild(row);
+          });
+        }
+
+        function renderPagination() {
+          const pagination = document.getElementById('pagination');
+          pagination.innerHTML = '';
+
+          for (let i = 1; i <= 2; i++) {
+            const pageLink = document.createElement('a');
+            pageLink.textContent = i;
+            pageLink.href = '#';
+            pageLink.className = i === currentPage ? 'active' : '';
+            pageLink.addEventListener('click', function (event) {
+              event.preventDefault();
+              currentPage = i;
+              const searchTerm = document.getElementById('searchInput').value;
+              renderTablePage(currentPage, searchTerm);
+              renderPagination();
+            });
+            pagination.appendChild(pageLink);
           }
+        }
 
-          function renderPagination() {
-              const pagination = document.getElementById('pagination');
-              pagination.innerHTML = '';
+        document.getElementById('searchInput').addEventListener('input', function (event) {
+          const searchTerm = event.target.value;
+          renderTablePage(currentPage, searchTerm);
+        });
 
-              for (let i = 1; i <= 2; i++) {
-                  const pageLink = document.createElement('a');
-                  pageLink.textContent = i;
-                  pageLink.href = '#';
-                  pageLink.className = i === currentPage ? 'active' : '';
-                  pageLink.addEventListener('click', function (event) {
-                      event.preventDefault();
-                      currentPage = i;
-                      renderTablePage(currentPage);
-                      renderPagination();
-                  });
-                  pagination.appendChild(pageLink);
-              }
-          }
-
-          renderTablePage(currentPage);
-          renderPagination();
+        renderTablePage(currentPage);
+        renderPagination();
       });
     </script>
   </body>
